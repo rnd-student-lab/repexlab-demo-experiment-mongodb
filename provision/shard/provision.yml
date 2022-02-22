@@ -1,0 +1,33 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: MongoDB configuration
+      template:
+        src: ./config-templates/mongod.j2
+        dest: /etc/mongod.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Create MongoDB data directory if it does not exist
+      file:
+        path: /data/db
+        owner: mongodb
+        group: mongodb
+        state: directory
+        mode: '0755'
+
+    - name: Enable and restart service MongoD
+      service:
+        name: mongod
+        enabled: yes
+        state: restarted
+
+    - name: Pause for 5 seconds
+      pause:
+        seconds: 5
+
+    - name: Initiate Replica Set
+      shell: mongo --eval "rs.initiate()"
+      ignore_errors: yes

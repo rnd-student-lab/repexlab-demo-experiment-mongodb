@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: MongoDB configuration
+      template:
+        src: ./config-templates/mongos.j2
+        dest: /etc/mongos.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Create MongoDB data directory if it does not exist
+      file:
+        path: /data/db
+        owner: mongodb
+        group: mongodb
+        state: directory
+        mode: '0755'
+
+    - name: Create MongoDB log file
+      file:
+        path: /var/log/mongodb/mongos.log
+        owner: mongodb
+        group: mongodb
+        state: touch
+        mode: '0755'
+

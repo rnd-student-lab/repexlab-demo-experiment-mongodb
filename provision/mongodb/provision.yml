@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install the gpg key for MongoDB
+      apt_key:
+        url: "https://www.mongodb.org/static/pgp/server-4.4.asc"
+        state: present
+    - name: Install the MongoDB repos
+      apt_repository:
+        repo: "deb https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/4.4 multiverse"
+        state: present
+        update_cache: yes
+    - name: Install the MongoDB
+      apt:
+        name: mongodb-org
+        state: latest

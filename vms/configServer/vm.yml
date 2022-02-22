@@ -1,0 +1,40 @@
+version: "0.1"
+defaults:
+  box: ubuntu/focal64
+  box_version: ">= 0"
+  provider:
+    provider: virtualbox
+    memory: 1024
+    cpus: 1
+    gui: false
+    hostname: configServer
+    network:
+      type: private_network
+      ip: 192.168.4.101
+    customize:
+      - - modifyvm
+        - :id
+        - --cpuexecutioncap
+        - 100
+      - - setextradata
+        - :id
+        - VBoxInternal2/SharedFoldersEnableSymlinksCreate/vagrant
+        - "1"
+  synced_folder:
+    type: virtualbox
+    from: ../../data
+    to: /vagrant
+    mount_options:
+      dmode: 777
+      fmode: 777
+  provision:
+    - type: ansible
+      directory: ../../provision/common
+      file: provision.yml
+    - type: ansible
+      directory: ../../provision/mongodb
+      file: provision.yml
+    - type: ansible
+      directory: provision
+      file: provision.yml
+stage:

@@ -1,0 +1,15 @@
+sharding:
+  configDB: configsrvReplicaSet/configServer:27017
+
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+  fork: true
+
+systemLog:
+  destination: file
+  path: /var/log/mongos.log
+

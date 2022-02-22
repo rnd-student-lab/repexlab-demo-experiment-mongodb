@@ -1,0 +1,189 @@
+version: "0.1"
+defaults:
+  box: ubuntu/focal64
+  box_version: ">= 0"
+  provider:
+    provider: virtualbox
+    memory: 1024
+    cpus: 1
+    gui: false
+    hostname: shard3
+    network:
+      type: private_network
+      ip: 192.168.4.105
+    customize:
+      - - modifyvm
+        - :id
+        - --cpuexecutioncap
+        - 100
+      - - setextradata
+        - :id
+        - VBoxInternal2/SharedFoldersEnableSymlinksCreate/vagrant
+        - "1"
+  synced_folder:
+    type: virtualbox
+    from: ../../data
+    to: /vagrant
+    mount_options:
+      dmode: 777
+      fmode: 777
+  provision:
+    - type: ansible
+      directory: ../../provision/common
+      file: provision.yml
+    - type: ansible
+      directory: ../../provision/mongodb
+      file: provision.yml
+    - type: ansible
+      directory: ../../provision/shard
+      file: provision.yml
+stage:
+  s01t01_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s01t02_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s01t03_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s01t04_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s01t05_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s02t01_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s02t02_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s02t03_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s02t04_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s02t05_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s03t01_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s03t02_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s03t03_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s03t04_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s03t05_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s04t01_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s04t02_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s04t03_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s04t04_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s04t05_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s05t01_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s05t02_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s05t03_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s05t04_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]
+
+  s05t05_disklimit:
+    provider:
+      customize:
+        - ["bandwidthctl", :id, "add", "LimitShard3", "--type", "disk", "--limit", "2M"]
+        - ["storageattach", :id, "--storagectl", "SCSI", "--port", "0", "--device", "0", "--type", "hdd", "--bandwidthgroup", "LimitShard3"]

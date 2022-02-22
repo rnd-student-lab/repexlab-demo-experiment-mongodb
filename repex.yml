@@ -1,0 +1,1519 @@
+version: "0.1"
+vms:
+  - name: configServer
+    path: vms/configServer
+  - name: mongos
+    path: vms/mongos
+  - name: client
+    path: vms/client
+  - name: shard1
+    path: vms/shard1
+  - name: shard2
+    path: vms/shard2
+  - name: shard3
+    path: vms/shard3
+  - name: shard4
+    path: vms/shard4
+  - name: shard5
+    path: vms/shard5
+stages:
+  - name: s01t01_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1]
+      - command: provision
+        vms: [configServer, client, mongos, shard1]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s01t01_disklimit
+    actions:
+      - command: restart
+        vms: [shard1]
+  - name: s01t01_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000000 1000
+  - name: s01t01_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1]
+        options:
+          start: s01t01_experiment
+          end: s01t01_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s01t01.txt
+  - name: s01t02_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1]
+      - command: provision
+        vms: [configServer, client, mongos, shard1]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s01t02_disklimit
+    actions:
+      - command: restart
+        vms: [shard1]
+  - name: s01t02_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 100000 10000
+  - name: s01t02_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1]
+        options:
+          start: s01t02_experiment
+          end: s01t02_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s01t02.txt
+  - name: s01t03_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1]
+      - command: provision
+        vms: [configServer, client, mongos, shard1]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s01t03_disklimit
+    actions:
+      - command: restart
+        vms: [shard1]
+  - name: s01t03_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 10000 100000
+  - name: s01t03_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1]
+        options:
+          start: s01t03_experiment
+          end: s01t03_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s01t03.txt
+  - name: s01t04_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1]
+      - command: provision
+        vms: [configServer, client, mongos, shard1]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s01t04_disklimit
+    actions:
+      - command: restart
+        vms: [shard1]
+  - name: s01t04_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000 1000000
+  - name: s01t04_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1]
+        options:
+          start: s01t04_experiment
+          end: s01t04_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s01t04.txt
+  - name: s01t05_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1]
+      - command: provision
+        vms: [configServer, client, mongos, shard1]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s01t05_disklimit
+    actions:
+      - command: restart
+        vms: [shard1]
+  - name: s01t05_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 200 5000000
+  - name: s01t05_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1]
+        options:
+          start: s01t05_experiment
+          end: s01t05_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s01t05.txt
+  - name: s02t01_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s02t01_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2]
+  - name: s02t01_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000000 1000
+  - name: s02t01_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2]
+        options:
+          start: s02t01_experiment
+          end: s02t01_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s02t01.txt
+  - name: s02t02_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s02t02_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2]
+  - name: s02t02_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 100000 10000
+  - name: s02t02_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2]
+        options:
+          start: s02t02_experiment
+          end: s02t02_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s02t02.txt
+  - name: s02t03_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s02t03_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2]
+  - name: s02t03_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 10000 100000
+  - name: s02t03_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2]
+        options:
+          start: s02t03_experiment
+          end: s02t03_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s02t03.txt
+  - name: s02t04_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s02t04_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2]
+  - name: s02t04_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000 1000000
+  - name: s02t04_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2]
+        options:
+          start: s02t04_experiment
+          end: s02t04_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s02t04.txt
+  - name: s02t05_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s02t05_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2]
+  - name: s02t05_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 200 5000000
+  - name: s02t05_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2]
+        options:
+          start: s02t05_experiment
+          end: s02t05_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s02t05.txt
+  - name: s03t01_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s03t01_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3]
+  - name: s03t01_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000000 1000
+  - name: s03t01_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3]
+        options:
+          start: s03t01_experiment
+          end: s03t01_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s03t01.txt
+  - name: s03t02_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s03t02_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3]
+  - name: s03t02_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 100000 10000
+  - name: s03t02_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3]
+        options:
+          start: s03t02_experiment
+          end: s03t02_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s03t02.txt
+  - name: s03t03_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s03t03_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3]
+  - name: s03t03_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 10000 100000
+  - name: s03t03_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3]
+        options:
+          start: s03t03_experiment
+          end: s03t03_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s03t03.txt
+  - name: s03t04_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s03t04_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3]
+  - name: s03t04_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000 1000000
+  - name: s03t04_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3]
+        options:
+          start: s03t04_experiment
+          end: s03t04_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s03t04.txt
+  - name: s03t05_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s03t05_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3]
+  - name: s03t05_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 200 5000000
+  - name: s03t05_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3]
+        options:
+          start: s03t05_experiment
+          end: s03t05_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s03t05.txt
+  - name: s04t01_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s04t01_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4]
+  - name: s04t01_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000000 1000
+  - name: s04t01_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4]
+        options:
+          start: s04t01_experiment
+          end: s04t01_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s04t01.txt
+  - name: s04t02_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s04t02_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4]
+  - name: s04t02_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 100000 10000
+  - name: s04t02_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4]
+        options:
+          start: s04t02_experiment
+          end: s04t02_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s04t02.txt
+  - name: s04t03_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s04t03_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4]
+  - name: s04t03_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 10000 100000
+  - name: s04t03_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4]
+        options:
+          start: s04t03_experiment
+          end: s04t03_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s04t03.txt
+  - name: s04t04_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s04t04_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4]
+  - name: s04t04_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000 1000000
+  - name: s04t04_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4]
+        options:
+          start: s04t04_experiment
+          end: s04t04_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s04t04.txt
+  - name: s04t05_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s04t05_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4]
+  - name: s04t05_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 200 5000000
+  - name: s04t05_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4]
+        options:
+          start: s04t05_experiment
+          end: s04t05_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s04t05.txt
+  - name: s05t01_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017'); sh.addShard('shard5ReplicaSet/shard5:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s05t01_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4, shard5]
+  - name: s05t01_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000000 1000
+  - name: s05t01_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4, shard5]
+        options:
+          start: s05t01_experiment
+          end: s05t01_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s05t01.txt
+  - name: s05t02_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017'); sh.addShard('shard5ReplicaSet/shard5:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s05t02_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4, shard5]
+  - name: s05t02_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 100000 10000
+  - name: s05t02_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4, shard5]
+        options:
+          start: s05t02_experiment
+          end: s05t02_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s05t02.txt
+  - name: s05t03_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017'); sh.addShard('shard5ReplicaSet/shard5:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s05t03_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4, shard5]
+  - name: s05t03_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 10000 100000
+  - name: s05t03_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4, shard5]
+        options:
+          start: s05t03_experiment
+          end: s05t03_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s05t03.txt
+  - name: s05t04_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017'); sh.addShard('shard5ReplicaSet/shard5:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s05t04_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4, shard5]
+  - name: s05t04_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 1000 1000000
+  - name: s05t04_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4, shard5]
+        options:
+          start: s05t04_experiment
+          end: s05t04_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s05t04.txt
+  - name: s05t05_init
+    actions:
+      - command: destroy
+      - command: start
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: setupHosts
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: provision
+        vms: [configServer, client, mongos, shard1, shard2, shard3, shard4, shard5]
+      - command: copy
+        vms: client
+        options:
+          direction: in
+          from: ./data/client
+          to: /home/vagrant/client
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && npm i &
+        description: Enable sharding on DB "test", Collection "items"
+      - command: exec
+        vms: mongos
+        options:
+          command: sudo bash -c "mongos --config /etc/mongos.conf"
+        description: Starting mongos
+      - command: exec
+        vms: mongos
+        options:
+          command: mongo --eval "sh.addShard('shard1ReplicaSet/shard1:27017'); sh.addShard('shard2ReplicaSet/shard2:27017'); sh.addShard('shard3ReplicaSet/shard3:27017'); sh.addShard('shard4ReplicaSet/shard4:27017'); sh.addShard('shard5ReplicaSet/shard5:27017');"
+        description: Adding shard
+      - command: exec
+        vms: mongos
+        options:
+          command: |
+            mongo "admin" --quiet --eval "sh.enableSharding('test'); sh.shardCollection('test.items', { shardKey: 'hashed' })"
+        description: Enable sharding on DB "test", Collection "items"
+  - name: s05t05_disklimit
+    actions:
+      - command: restart
+        vms: [shard1, shard2, shard3, shard4, shard5]
+  - name: s05t05_experiment
+    actions:
+      - command: exec
+        vms: client
+        options:
+          command: cd /home/vagrant/client && node experiment.js 200 5000000
+  - name: s05t05_report
+    actions:
+      - command: report
+        vms: [client, mongos, shard1, shard2, shard3, shard4, shard5]
+        options:
+          start: s05t05_experiment
+          end: s05t05_experiment
+          labels: [CPU, MEM, DSK]
+      - command: copy
+        vms: client
+        options:
+          direction: out
+          from: /home/vagrant/client/report.txt
+          to: ./data/s05t05.txt
